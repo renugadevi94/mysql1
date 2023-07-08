@@ -1,0 +1,331 @@
+create database movies;
+use movies;
+
+CREATE TABLE genres (
+    `genre_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `genre`  VARCHAR(50)
+  );
+
+
+
+CREATE TABLE movies (
+  `movie_id` INT(10) UNSIGNED PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  `title` VARCHAR(255),
+ `releasedon` date,
+  `language` VARCHAR(50),
+   `genre_id` INT,
+   `director` varchar(40) default null,
+  FOREIGN KEY (`genre_id`) REFERENCES genres(`genre_id`)
+);
+
+
+  
+CREATE TABLE media (
+  `media_id` INT PRIMARY KEY AUTO_INCREMENT,
+  `movie_id` INT(10) UNSIGNED,
+  type ENUM('video', 'image'),
+  `url` VARCHAR(255),
+  FOREIGN KEY (movie_id) REFERENCES movies(movie_id)
+);
+
+
+CREATE TABLE users (
+    ->   `user_id` INT PRIMARY KEY AUTO_INCREMENT,
+    ->   `username` VARCHAR(50),
+    ->   `email` VARCHAR(255),
+    ->   `password` VARCHAR(255)
+    -> );
+
+CREATE TABLE reviews (
+    ->   `review_id` INT PRIMARY KEY AUTO_INCREMENT,
+    ->   `movie_id` INT(10) UNSIGNED,
+    ->   `user_id` INT,
+    ->   `rating` INT,
+    ->   `comment` TEXT,
+    ->   FOREIGN KEY (`movie_id`) REFERENCES movies(`movie_id`),
+    ->   FOREIGN KEY (`user_id`) REFERENCES users(`user_id`)
+    -> );
+
+ CREATE TABLE artists (
+    ->   `artist_id` INT PRIMARY KEY AUTO_INCREMENT,
+    ->   `name` VARCHAR(255),
+    ->   `bio` TEXT
+    -> );
+
+CREATE TABLE skills (
+    ->   `skill_id` INT PRIMARY KEY AUTO_INCREMENT,
+    ->   `skill` VARCHAR(50)
+    -> );
+
+CREATE TABLE artist_skills (
+    ->   `artist_id` INT,
+    ->   `skill_id` INT,
+    ->   PRIMARY KEY (artist_id, skill_id),
+    ->   FOREIGN KEY (artist_id) REFERENCES artists(`artist_id`),
+    ->   FOREIGN KEY (skill_id) REFERENCES skills(skill_id)
+    -> );
+
+
+CREATE TABLE roles (
+    ->   `role_id` INT PRIMARY KEY AUTO_INCREMENT,
+    ->   `role` VARCHAR(50)
+    -> );
+
+ CREATE TABLE movie_roles (
+    ->   `movie_id` INT(10) UNSIGNED,
+    ->   `artist_id` INT,
+    ->   `role_id` INT,
+    ->   PRIMARY KEY (movie_id, artist_id, role_id),
+    ->   FOREIGN KEY (movie_id) REFERENCES movies(movie_id),
+    ->   FOREIGN KEY (artist_id) REFERENCES artists(artist_id),
+    ->   FOREIGN KEY (role_id) REFERENCES roles(role_id)
+    -> );
+
+
+
+
+1. Movie should have multiple media(Video or Image)
+
+
+select * from movies;
+
++----------+----------------+------------+----------+----------+----------+
+| movie_id | title          | releasedon | language | genre_id | director |
++----------+----------------+------------+----------+----------+----------+
+|        1 | The blind      | 1999-04-03 | english  |      101 | john     |
+|        2 | Babies day out | 1998-08-03 | english  |      102 | graham   |
+|        3 | horry          | 2022-04-03 | english  |      103 | richard  |
++----------+----------------+------------+----------+----------+----------+
+
+
+
+ select * from media;
+
++----------+----------+-------+---------------------+
+| media_id | movie_id | type  | url                 |
++----------+----------+-------+---------------------+
+|       10 |        1 | video | https://video/movie |
+|       11 |        2 | video | https://video/movie |
+|       12 |        3 | image | https://image/movie |
++----------+----------+-------+---------------------+
+
+                  
+               Output
+               ******
+
+select movies.movie_id,movies.title,media.media_id,media.type from media INNER JOIN movies ON media.movie_id=movies.movie_id;
+
++----------+----------------+----------+-------+---------------------+
+| movie_id | title          | media_id | type  | url                 |
++----------+----------------+----------+-------+---------------------+
+|        1 | The blind      |       10 | video | https://video/movie |
+|        2 | Babies day out |       11 | video | https://video/movie |
+|        3 | horry          |       12 | image | https://image/movie |
++----------+----------------+----------+-------+---------------------+
+
+
+
+
+2. Movie can belongs to multiple Genre
+
+
+ select * from genres;              
+
++----------+--------+            
+| genre_id | genre  |
++----------+--------+
+|      100 | comedy |
+|      101 | action |
+|      102 | horror |
+|      103 | comedy |
+|      104 | horror |
++----------+--------+
+
+select * from movies;
+
++----------+----------------+------------+----------+----------+----------+
+| movie_id | title          | releasedon | language | genre_id | director |
++----------+----------------+------------+----------+----------+----------+
+|        1 | The blind      | 1999-04-03 | english  |      101 | john     |
+|        2 | Babies day out | 1998-08-03 | english  |      102 | graham   |
+|        3 | horry          | 2022-04-03 | english  |      103 | richard  |
++----------+----------------+------------+----------+----------+----------+
+
+                         Output
+                         ******
+
+select movies.movie_id,movies.title,genres.genre,genres.genre_id from genres INNER JOIN movies ON genres.genre_id=movies.genre_id;
+
++----------+----------------+--------+----------+
+| movie_id | title          | genre  | genre_id |
++----------+----------------+--------+----------+
+|        1 | The blind      | action |      101 |
+|        2 | Babies day out | horror |      102 |
+|        3 | horry          | comedy |      103 |
++----------+----------------+--------+----------+
+
+
+ 
+
+3. A) Movie can have multiple reviews
+
+
+select * from reviews;
++-----------+----------+---------+--------+---------+
+| review_id | movie_id | user_id | rating | comment |
++-----------+----------+---------+--------+---------+
+|      1000 |        1 |     500 |      5 | good    |
+|      1001 |        2 |     600 |      4 | not bad |
+|      1002 |        3 |     700 |      4 | awesome |
++-----------+----------+---------+--------+---------+
+
+select * from movies;
+
++----------+----------------+------------+----------+----------+----------+
+| movie_id | title          | releasedon | language | genre_id | director |
++----------+----------------+------------+----------+----------+----------+
+|        1 | The blind      | 1999-04-03 | english  |      101 | john     |
+|        2 | Babies day out | 1998-08-03 | english  |      102 | graham   |
+|        3 | horry          | 2022-04-03 | english  |      103 | richard  |
++----------+----------------+------------+----------+----------+----------+
+
+                  Output
+                  ******
+
+
+select movies.title,reviews.review_id,reviews.comment,reviews.rating from reviews INNER JOIN movies ON reviews.movie_id=movies.movie_id;
+
++----------------+-----------+---------+--------+
+| title          | review_id | comment | rating |
++----------------+-----------+---------+--------+
+| The blind      |      1000 | good    |      5 |
+| Babies day out |      1001 | not bad |      4 |
+| horry          |      1002 | awesome |      4 |
++----------------+-----------+---------+--------+
+
+
+B) Review can belongs to a user
+
+
+select * from users;
+
++---------+----------+----------------+--------------+
+| user_id | username | email          | password     |
++---------+----------+----------------+--------------+
+|     500 | raja     | raja@gmail.com | *******      |
+|     600 | sri      | sri@gmail.com  | **********   |
+|     700 | maha     | maha@gmail.com | ********     |
+|     800 | maha     | maha@gmail.com | ************ |
++---------+----------+----------------+--------------+
+
+select * from reviews;
+
++-----------+----------+---------+--------+---------+
+| review_id | movie_id | user_id | rating | comment |
++-----------+----------+---------+--------+---------+
+|      1000 |        1 |     500 |      5 | good    |
+|      1001 |        2 |     600 |      4 | not bad |
+|      1002 |        3 |     700 |      4 | awesome |
++-----------+----------+---------+--------+---------+
+
+                   Output
+                   ******
+
+
+select users.username,reviews.comment from users LEFT JOIN reviews ON reviews.user_id=users.user_id;
+
+
++----------+---------+
+| username | comment |
++----------+---------+
+| raja     | good    |
+| sri      | not bad |
+| maha     | awesome |
+| maha     | NULL    |
++----------+---------+
+
+
+
+
+4) 4. Artist can have multiple skills
+
+
+select * from artists;
+
++-----------+-----------+---------+
+| artist_id | name      | bio     |
++-----------+-----------+---------+
+|         1 | sharukhan | mumbai  |
+|         2 | salman    | chennai |
+|         3 | rithik    | london  |                       
++----------+------------+---------+
+
+
+select * from skills;
++----------+------------+
+| skill_id | skill      |
++----------+------------+
+|       50 | actor      |
+|       51 | player     |
+|       52 | programmer |
++----------+------------+
+
+                 Output
+                 ******
+
+select skills.skill_id,artist_skills.artist_id from skills INNER JOIN artist_skills ON skills.skill_id=artist_skills.skill_id;
+
++----------+-----------+
+| skill_id | artist_id |
++----------+-----------+
+|       50 |         1 |
+|       50 |         3 |
+|       51 |         1 |
+|       51 |         2 |
+|       52 |         3 |
++----------+-----------+
+
+5. Artist can perform multiple role in a single film
+
+
+select * from roles;
++---------+------------------+
+| role_id | role             |
++---------+------------------+
+|    5000 | guest star       |
+|    5010 | co star          |
+|    5020 | background actor |
+|    5030 | recurring        |
++---------+------------------+
+
+
+ 
+ select * from movie_roles;
++----------+-----------+---------+
+| movie_id | artist_id | role_id |
++----------+-----------+---------+
+|        3 |         1 |    5030 |
+|        1 |         2 |    5020 |
+|        2 |         2 |    5000 |
+|        3 |         3 |    5030 |
++----------+-----------+---------+
+
+         Output
+         ******
+
+
+select movies.movie_id,movies.title,movie_roles.role_id from movie_roles INNER JOIN movies ON movie_roles.movie_id=movies.movie_id;
+
++----------+----------------+---------+
+| movie_id | title          | role_id |
++----------+----------------+---------+
+|        1 | The blind      |    5020 |
+|        2 | Babies day out |    5000 |
+|        3 | horry          |    5030 |
+|        3 | horry          |    5030 |
++----------+----------------+---------+
+
+
+
+
+
